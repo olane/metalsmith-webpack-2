@@ -51,7 +51,7 @@ describe('metalsmith-webpack', function () {
         assertDir('test/fixtures/basic/expected', 'test/fixtures/basic/build')
         return done(null)
       })
-  })
+  }).timeout(0)
 
   it('should pack complex', function (done) {
     (new Metalsmith('test/fixtures/complex'))
@@ -71,7 +71,7 @@ describe('metalsmith-webpack', function () {
         assertDir('test/fixtures/complex/expected', 'test/fixtures/complex/build')
         return done(null)
       })
-  })
+  }).timeout(0)
   it('should create meta structure', function (done) {
     (new Metalsmith('test/fixtures/meta'))
     .use(webpack({
@@ -101,7 +101,7 @@ describe('metalsmith-webpack', function () {
       if (err) throw err
       done(null)
     })
-  })
+  }).timeout(0)
 
   it('should skip build with cache', (done) => {
     // make cache
@@ -148,5 +148,5 @@ describe('metalsmith-webpack', function () {
         done(null)
       })
     })
-  })
+  }).timeout(0)
 })

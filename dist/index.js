@@ -181,9 +181,9 @@ function populate(files, metalsmith) {
     Object.keys(assetsByChunkName).forEach(chunkName => {
       assets[chunkName] = (0, _path.join)(_path.sep, assetsByChunkName[chunkName].slice(-1).join());
     });
-    meta.webpack = { stats, assets };
-    // dump this to show consumers whats in the meta / assets structure
-    dbg(assets);
+    meta.webpack = { stats, assets
+      // dump this to show consumers whats in the meta / assets structure
+    };dbg(assets);
   }).then(() => metaCache.retrieve('statsDisplay')).then(result => {
     // dump stats
     dbg(result);
