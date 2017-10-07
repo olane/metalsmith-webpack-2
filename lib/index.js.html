@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>index.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../";
+    var thisFile = "lib/index.js";
+    var defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+
+      <div class="heading h2">
+        <a href="#promisify">promisify</a>
+      </div>
+
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container">
+    <div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+    
+      <tr>
+        <td class="docs">
+          <h1>index.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+    
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1"></a>
+</div>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript"><span class="hljs-keyword">import</span> {
+  join,
+  relative,
+  sep
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'path'</span>
+<span class="hljs-keyword">import</span> webpack <span class="hljs-keyword">from</span> <span class="hljs-string">'webpack'</span>
+<span class="hljs-keyword">import</span> debug <span class="hljs-keyword">from</span> <span class="hljs-string">'debug'</span>
+<span class="hljs-keyword">import</span> MemoryFs <span class="hljs-keyword">from</span> <span class="hljs-string">'memory-fs'</span>
+<span class="hljs-keyword">import</span> vow <span class="hljs-keyword">from</span> <span class="hljs-string">'vow'</span>
+<span class="hljs-keyword">import</span> {
+  FileCache,
+  ValueCache
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'metalsmith-cache'</span>
+
+<span class="hljs-keyword">import</span> multimatch <span class="hljs-keyword">from</span> <span class="hljs-string">'multimatch'</span>
+
+<span class="hljs-keyword">const</span> dbg = debug(<span class="hljs-string">'metalsmith-webpack'</span>)
+
+<span class="hljs-keyword">const</span> modTimes = <span class="hljs-keyword">new</span> ValueCache(<span class="hljs-string">'webpack-mod-times'</span>)
+<span class="hljs-keyword">const</span> metaCache = <span class="hljs-keyword">new</span> ValueCache(<span class="hljs-string">'webpack'</span>)
+<span class="hljs-keyword">const</span> fileCache = <span class="hljs-keyword">new</span> FileCache(<span class="hljs-string">'webpack'</span>)
+
+<span class="hljs-keyword">let</span> fromCache
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2"></a>
+</div>
+<div class="dox">
+<div class="summary">
+<p>##plugin</p>
+</div>
+<div class="body">
+</div>
+<div class="details">
+<div class="dox_tag_title">Params</div>
+<div class="dox_tag_detail">
+<span class="dox_tag_name">options</span>
+<span class="dox_type">Object</span>
+<span>webpack options
+</span>
+</div>
+</div>
+</div>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">plugin</span> (<span class="hljs-params">options = <span class="hljs-string">'webpack.config.js'</span>, dependencies</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpack</span> (<span class="hljs-params">files, metalsmith</span>) </span>{
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3"></a>
+</div>
+<p>deal with options inside plugin so we have access to metalsmith</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">    <span class="hljs-keyword">if</span> (
+      <span class="hljs-keyword">typeof</span> options === <span class="hljs-string">'string'</span> ||
+      options.config === <span class="hljs-literal">undefined</span>
+    ) options = { <span class="hljs-attr">config</span>: options }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> options.config === <span class="hljs-string">'string'</span>) {
+      options.config = <span class="hljs-built_in">require</span>(metalsmith.path(options.config))
+    }
+    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">Array</span>.isArray(options.config)) options.config = [options.config]
+
+    fromCache = <span class="hljs-literal">true</span>
+
+    <span class="hljs-keyword">return</span> vow.resolve()
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> invalidate(options))
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> validateCache(dependencies, files))
+    .catch(<span class="hljs-function">(<span class="hljs-params">reason</span>) =&gt;</span> transpile(reason, options, metalsmith))
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> populate(files, metalsmith))
+    .catch(dbg)
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">invalidate</span> (<span class="hljs-params">options</span>) </span>{
+  <span class="hljs-keyword">if</span> (options.clearCache || options.invalidate) {
+    <span class="hljs-keyword">return</span> vow.all([
+      modTimes.invalidate(),
+      fileCache.invalidate(),
+      metaCache.invalidate()
+    ])
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">validateCache</span> (<span class="hljs-params">dependencies, files</span>) </span>{
+  <span class="hljs-keyword">if</span> (!dependencies) <span class="hljs-keyword">return</span> vow.reject(<span class="hljs-string">'no dependencies specified'</span>)
+  <span class="hljs-keyword">if</span> (process.env.NODE_ENV === <span class="hljs-string">'production'</span>) {
+    <span class="hljs-keyword">return</span> vow.reject(<span class="hljs-string">'production build'</span>)
+  }
+
+  dependencies = [].concat(dependencies)
+  dependencies = multimatch(<span class="hljs-built_in">Object</span>.keys(files), dependencies)
+  <span class="hljs-keyword">if</span> (dependencies.length === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> vow.reject(<span class="hljs-string">'dependencies matched 0 files'</span>)
+  }
+  <span class="hljs-keyword">const</span> resolvers = dependencies.map(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> current = files[file].stats.mtime.getTime()
+    <span class="hljs-keyword">return</span> vow.resolve()
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> modTimes.retrieve(file))
+    .then(<span class="hljs-function">(<span class="hljs-params">cached</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (cached !== current) <span class="hljs-keyword">return</span> vow.reject()
+    })
+  })
+  <span class="hljs-keyword">return</span> vow.all(resolvers)
+  .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    dbg(<span class="hljs-string">'cache valid, skipping transpile'</span>)
+  })
+  .catch(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> vow.resolve()
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> modTimes.invalidate())
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4"></a>
+</div>
+<p>you can't just do this as part of the above resolver structure,
+because only the first updated time would be stored, then the structure
+would reject.</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-keyword">const</span> resolvers = dependencies.map(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+        <span class="hljs-keyword">return</span> modTimes.store(file, files[file].stats.mtime.getTime())
+      })
+      <span class="hljs-keyword">return</span> vow.all(resolvers)
+    })
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> fileCache.invalidate())
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> vow.reject(<span class="hljs-string">'dependencies changed'</span>))
+  })
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transpile</span> (<span class="hljs-params">reason, options, metalsmith</span>) </span>{
+  dbg(<span class="hljs-string">`cache invalid (will transpile): <span class="hljs-subst">${reason}</span>`</span>)
+
+  <span class="hljs-keyword">const</span> compiler = webpack(options.config)
+  <span class="hljs-keyword">const</span> fs = <span class="hljs-keyword">new</span> MemoryFs()
+  compiler.outputFileSystem = fs
+
+  fromCache = <span class="hljs-literal">false</span>
+
+  <span class="hljs-keyword">return</span> promisify(compiler.run.bind(compiler))()
+  .then(<span class="hljs-function">(<span class="hljs-params">stats</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (stats.hasErrors()) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(stats)
+    <span class="hljs-keyword">return</span> metaCache.store(<span class="hljs-string">'statsDisplay'</span>, stats.toString(options.stats))
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> metaCache.store(<span class="hljs-string">'stats'</span>, stats.toJson()))
+    .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      dbg(<span class="hljs-string">'stored'</span>)
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5"></a>
+</div>
+<p><em>assetsByChunkName</em> will have a property for each chunkName from
+all children, containing an array of buildPaths for assets</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-keyword">const</span> assetsByChunkName = {}
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6"></a>
+</div>
+<p>the async writes to cache don't need to complete before the next
+iteration, so each write operation can be stored in an array, then
+at the end wrap all those ops in vow.all</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-keyword">const</span> resolvers = []
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7"></a>
+</div>
+<p>this doesn't actually output json, rather a plain object</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      stats = stats.toJson()
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8"></a>
+</div>
+<p><em>iterate over <code>stats.children</code> array</em>
+there will be one child for each config, if you're passing in an array
+need to access assets from stats.children[idx] and output path from
+config[idx].output.path so iterate over keys rather than <code>for in</code> style</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-built_in">Object</span>.keys(stats.children).forEach(<span class="hljs-function">(<span class="hljs-params">childIdx</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> child = stats.children[childIdx]
+        <span class="hljs-keyword">const</span> outputPath = options.config[childIdx].output.path
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9"></a>
+</div>
+<p><em>iterate over <code>assetsByChunkName</code> property</em>
+I think a chunk is roughly equivalent to an entry point (not sure?)
+so if you set several entry points, you'll have corresponding
+assets for each chunk name</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">        <span class="hljs-built_in">Object</span>.keys(child.assetsByChunkName).forEach(<span class="hljs-function">(<span class="hljs-params">chunkName</span>) =&gt;</span> {
+          assetsByChunkName[chunkName] = []
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10"></a>
+</div>
+<p>[].concat ensures array</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">          <span class="hljs-keyword">let</span> assets = [].concat(child.assetsByChunkName[chunkName])
+          assets.forEach(<span class="hljs-function">(<span class="hljs-params">assetName</span>) =&gt;</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11"></a>
+</div>
+<p>fullPath (absolute) to asset, as it's stored in memory</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">            <span class="hljs-keyword">const</span> fullPath = join(outputPath, assetName)
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12"></a>
+</div>
+<p>buildPath (relative) path to asset as it will be stored in ms</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">            <span class="hljs-keyword">const</span> buildPath = relative(metalsmith.destination(), fullPath)
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13"></a>
+</div>
+<p>store file in cache</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">            resolvers.push(
+              fileCache.store(buildPath, {<span class="hljs-attr">contents</span>: fs.readFileSync(fullPath)})
+            )
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14"></a>
+</div>
+<p>store buildPath</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">            assetsByChunkName[chunkName].push(buildPath)
+          })
+        })
+      })
+      resolvers.push(metaCache.store(<span class="hljs-string">'assetsByChunkName'</span>, assetsByChunkName))
+      <span class="hljs-keyword">return</span> vow.all(resolvers)
+      .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> vow.resolve(assetsByChunkName))
+    })
+  })
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">populate</span> (<span class="hljs-params">files, metalsmith</span>) </span>{
+  <span class="hljs-keyword">let</span> assetsByChunkName
+  <span class="hljs-keyword">let</span> meta
+  <span class="hljs-keyword">let</span> stats
+  <span class="hljs-keyword">return</span> vow.resolve()
+  .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> metaCache.retrieve(<span class="hljs-string">'assetsByChunkName'</span>))
+  .then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    assetsByChunkName = result
+    <span class="hljs-keyword">const</span> resolvers = []
+    <span class="hljs-built_in">Object</span>.values(assetsByChunkName).forEach(<span class="hljs-function">(<span class="hljs-params">assets</span>) =&gt;</span> {
+      resolvers.concat(assets.map(<span class="hljs-function">(<span class="hljs-params">asset</span>) =&gt;</span> {
+        <span class="hljs-keyword">return</span> fileCache.retrieve(asset)
+        .then(<span class="hljs-function">(<span class="hljs-params">file</span>) =&gt;</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15"></a>
+</div>
+<p>dbg(Object.keys(file.contents))</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">          files[asset] = file
+        })
+      }))
+    })
+    <span class="hljs-keyword">return</span> vow.all(resolvers)
+  })
+  .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> metaCache.retrieve(<span class="hljs-string">'stats'</span>))
+  .then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    stats = <span class="hljs-built_in">Object</span>.assign(result, {fromCache})
+    meta = metalsmith.metadata()
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16"></a>
+</div>
+<p>one chunk may have multiple assets, in meta we're just going to
+store the path to the last asset. Probably wont work for all uses.</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">    <span class="hljs-keyword">const</span> assets = {}
+    <span class="hljs-built_in">Object</span>.keys(assetsByChunkName).forEach(<span class="hljs-function">(<span class="hljs-params">chunkName</span>) =&gt;</span> {
+      assets[chunkName] = join(sep, assetsByChunkName[chunkName].slice(<span class="hljs-number">-1</span>).join())
+    })
+    meta.webpack = { stats, assets }
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-17" id="section-17"></a>
+</div>
+<p>dump this to show consumers whats in the meta / assets structure</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">    dbg(assets)
+  })
+  .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> metaCache.retrieve(<span class="hljs-string">'statsDisplay'</span>))
+  .then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-18" id="section-18"></a>
+</div>
+<p>dump stats</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">    dbg(result)
+  })
+}
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="dox">
+<div class="summary">
+<div class="pilwrap" id="promisify">
+  <h2>
+    <a href="#promisify" name="promisify" class="pilcrow"></a>
+promisify
+  </h2>
+</div>
+<p>wrap fn with promise.. should probably use some package</p>
+</div>
+<div class="body">
+</div>
+</div>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">promisify</span> (<span class="hljs-params">fn</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">...args</span>) </span>{
+    <span class="hljs-keyword">const</span> defer = vow.defer()
+
+    args.push(<span class="hljs-function">(<span class="hljs-params">err, result</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> defer.reject(err)
+      defer.resolve(result)
+    })
+    <span class="hljs-keyword">try</span> {
+      fn.apply(<span class="hljs-keyword">this</span>, args)
+    } <span class="hljs-keyword">catch</span> (err) {
+      defer.reject(err)
+    }
+    <span class="hljs-keyword">return</span> defer.promise()
+  }
+}
+
+</pre>
+        </td>
+      </tr>
+    
+  </tbody>
+</table>
+
+  </div>
+</body>
+</html>

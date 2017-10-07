@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>index.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../doc-style.css" />
+  <script src="../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../";
+    var thisFile = "test/index.js";
+    var defaultSidebar = true;
+  </script>
+  <script src="../doc-script.js"></script>
+
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container">
+    <div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+    
+      <tr>
+        <td class="docs">
+          <h1>index.js</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+    
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1"></a>
+</div>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript"><span class="hljs-keyword">import</span> assertDir <span class="hljs-keyword">from</span> <span class="hljs-string">'assert-dir-equal'</span>
+<span class="hljs-keyword">import</span> Metalsmith <span class="hljs-keyword">from</span> <span class="hljs-string">'metalsmith'</span>
+<span class="hljs-keyword">import</span> eslint <span class="hljs-keyword">from</span> <span class="hljs-string">'mocha-eslint'</span>
+<span class="hljs-keyword">import</span> {
+  resolve
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'path'</span>
+<span class="hljs-keyword">import</span> {
+  <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> webpack
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'../lib'</span>
+<span class="hljs-keyword">import</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2"></a>
+</div>
+<p>writeFileSync as write,</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">  readFileSync <span class="hljs-keyword">as</span> read,
+  unlinkSync <span class="hljs-keyword">as</span> unlink
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'fs'</span>
+<span class="hljs-keyword">import</span> assert <span class="hljs-keyword">from</span> <span class="hljs-string">'assert'</span>
+<span class="hljs-keyword">import</span> debug <span class="hljs-keyword">from</span> <span class="hljs-string">'debug'</span>
+
+eslint([<span class="hljs-string">'test/*.js'</span>, <span class="hljs-string">'lib'</span>])
+
+<span class="hljs-keyword">const</span> dbg = debug(<span class="hljs-string">'metalsmith-webpack'</span>)
+
+describe(<span class="hljs-string">'metalsmith-webpack'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3"></a>
+</div>
+<p>clean up</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">  after(<span class="hljs-function">(<span class="hljs-params">done</span>) =&gt;</span> {
+    unlink(<span class="hljs-string">'cache/webpack-files.db'</span>)
+    unlink(<span class="hljs-string">'cache/webpack-mod-times-values.db'</span>)
+    unlink(<span class="hljs-string">'cache/webpack-values.db'</span>)
+    done()
+  })
+
+  it(<span class="hljs-string">'should pack (basic config)'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+    (<span class="hljs-keyword">new</span> Metalsmith(<span class="hljs-string">'test/fixtures/basic'</span>))
+      .use(webpack({
+        <span class="hljs-attr">config</span>: {
+          <span class="hljs-attr">context</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/basic/src/js'</span>),
+          <span class="hljs-attr">entry</span>: <span class="hljs-string">'./index.js'</span>,
+          <span class="hljs-attr">output</span>: {
+            <span class="hljs-attr">path</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/basic/build/js'</span>),
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">'bundle.js'</span>
+          }
+        },
+        <span class="hljs-attr">stats</span>: { <span class="hljs-attr">chunks</span>: <span class="hljs-literal">false</span> }
+      }))
+      .use(<span class="hljs-function">(<span class="hljs-params">files</span>) =&gt;</span> {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4"></a>
+</div>
+<p>dbg(files)</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      })
+      .build(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, files</span>) </span>{
+        <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> done(err)
+        dbg(<span class="hljs-built_in">Object</span>.keys(files))
+        assert.equal(<span class="hljs-built_in">Object</span>.keys(files).length, <span class="hljs-number">4</span>)
+        assertDir(<span class="hljs-string">'test/fixtures/basic/expected'</span>, <span class="hljs-string">'test/fixtures/basic/build'</span>)
+        <span class="hljs-keyword">return</span> done(<span class="hljs-literal">null</span>)
+      })
+  }).timeout(<span class="hljs-number">0</span>)
+
+  it(<span class="hljs-string">'should pack complex'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+    (<span class="hljs-keyword">new</span> Metalsmith(<span class="hljs-string">'test/fixtures/complex'</span>))
+      .use(webpack({
+        <span class="hljs-attr">context</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/complex/src/js'</span>),
+        <span class="hljs-attr">entry</span>: {
+          <span class="hljs-attr">a</span>: <span class="hljs-string">'./index-a.js'</span>,
+          <span class="hljs-attr">b</span>: <span class="hljs-string">'./index-b.js'</span>
+        },
+        <span class="hljs-attr">output</span>: {
+          <span class="hljs-attr">path</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/complex/build/js'</span>),
+          <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name]-bundle.js'</span>
+        }
+      }))
+      .build(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+        <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> done(err)
+        assertDir(<span class="hljs-string">'test/fixtures/complex/expected'</span>, <span class="hljs-string">'test/fixtures/complex/build'</span>)
+        <span class="hljs-keyword">return</span> done(<span class="hljs-literal">null</span>)
+      })
+  }).timeout(<span class="hljs-number">0</span>)
+  it(<span class="hljs-string">'should create meta structure'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+    (<span class="hljs-keyword">new</span> Metalsmith(<span class="hljs-string">'test/fixtures/meta'</span>))
+    .use(webpack({
+      <span class="hljs-attr">context</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/src/js'</span>),
+      <span class="hljs-attr">entry</span>: {
+        <span class="hljs-attr">a</span>: <span class="hljs-string">'./index-a.js'</span>,
+        <span class="hljs-attr">b</span>: <span class="hljs-string">'./index-b.js'</span>
+      },
+      <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/build/js'</span>),
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name]-bundle.js'</span>
+      }
+    }))
+    .use(<span class="hljs-function">(<span class="hljs-params">files, metalsmith</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> fixturePath = resolve(__dirname, <span class="hljs-string">'./fixtures/meta/meta.json'</span>)
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5"></a>
+</div>
+<p>dump meta to refresh fixture
+write(
+fixturePath,
+JSON.stringify(metalsmith.metadata().webpack.assets)
+)</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-keyword">const</span> meta = metalsmith.metadata().webpack
+      assert.ok(meta.stats)
+      assert.ok(meta.assets)
+      assert.deepEqual(meta.assets, <span class="hljs-built_in">JSON</span>.parse(read(fixturePath)))
+    })
+    .build(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, files</span>) </span>{
+      <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">throw</span> err
+      done(<span class="hljs-literal">null</span>)
+    })
+  }).timeout(<span class="hljs-number">0</span>)
+
+  it(<span class="hljs-string">'should skip build with cache'</span>, (done) =&gt; {
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6"></a>
+</div>
+<p>make cache</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">    <span class="hljs-keyword">new</span> Metalsmith(<span class="hljs-string">'test/fixtures/createCache'</span>)
+    .use(webpack(
+      {
+        <span class="hljs-attr">context</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/src/js'</span>),
+        <span class="hljs-attr">entry</span>: {
+          <span class="hljs-attr">a</span>: <span class="hljs-string">'./index-a.js'</span>,
+          <span class="hljs-attr">b</span>: <span class="hljs-string">'./index-b.js'</span>
+        },
+        <span class="hljs-attr">output</span>: {
+          <span class="hljs-attr">path</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/build/js'</span>),
+          <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name]-bundle.js'</span>
+        }
+      },
+      <span class="hljs-string">'**/*.js'</span>
+    ))
+    .build(<span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> done(err)
+
+</pre>
+        </td>
+      </tr>
+    
+      <tr>
+        <td class="docs">
+          <div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7"></a>
+</div>
+<p>use cache</p>
+
+        </td>
+        <td class="code highlight">
+          <pre class="javascript">      <span class="hljs-keyword">new</span> Metalsmith(<span class="hljs-string">'test/fixtures/createCache'</span>)
+      .use(webpack(
+        {
+          <span class="hljs-attr">context</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/src/js'</span>),
+          <span class="hljs-attr">entry</span>: {
+            <span class="hljs-attr">a</span>: <span class="hljs-string">'./index-a.js'</span>,
+            <span class="hljs-attr">b</span>: <span class="hljs-string">'./index-b.js'</span>
+          },
+          <span class="hljs-attr">output</span>: {
+            <span class="hljs-attr">path</span>: resolve(__dirname, <span class="hljs-string">'./fixtures/meta/build/js'</span>),
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name]-bundle.js'</span>
+          }
+        },
+        <span class="hljs-string">'**/*.js'</span>
+      ))
+      .use(<span class="hljs-function">(<span class="hljs-params">files, metalsmith</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> meta = metalsmith.metadata().webpack
+        assert.ok(meta.stats.fromCache)
+      })
+      .build(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, files</span>) </span>{
+        <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">throw</span> err
+        done(<span class="hljs-literal">null</span>)
+      })
+    })
+  }).timeout(<span class="hljs-number">0</span>)
+})
+
+</pre>
+        </td>
+      </tr>
+    
+  </tbody>
+</table>
+
+  </div>
+</body>
+</html>
