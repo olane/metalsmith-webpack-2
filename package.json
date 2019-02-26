@@ -26,12 +26,15 @@
     "babel:node6": "cross-env NODE_ENV=node6 babel lib -d dist",
     "test:watch": "cross-env NODE_ENV=test DEBUG=metalsmith-webpack,metalsmith-cache mocha --reporter spec --compilers js:babel-register --watch test"
   },
+  "peerDependencies": {
+    "webpack": "^4.0.0"
+  },
   "dependencies": {
     "debug": "^2.6.6",
     "memory-fs": "^0.4.1",
     "metalsmith-cache": "^1.0.1",
     "vow": "^0.4.15",
-    "webpack": "^2.5.1"
+    "webpack": "^4.29.5"
   },
   "devDependencies": {
     "assert-dir-equal": "^1.0.1",
