@@ -74,12 +74,16 @@
     <span class="hljs-attr">"babel:node6"</span>: <span class="hljs-string">"cross-env NODE_ENV=node6 babel lib -d dist"</span>,
     <span class="hljs-attr">"test:watch"</span>: <span class="hljs-string">"cross-env NODE_ENV=test DEBUG=metalsmith-webpack,metalsmith-cache mocha --reporter spec --compilers js:babel-register --watch test"</span>
   },
+  <span class="hljs-attr">"peerDependencies"</span>: {
+    <span class="hljs-attr">"webpack"</span>: <span class="hljs-string">"^4.0.0"</span>
+  },
   <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"acorn"</span>: <span class="hljs-string">"^6.1.0"</span>,
+    <span class="hljs-attr">"ajv"</span>: <span class="hljs-string">"^6.9.2"</span>,
     <span class="hljs-attr">"debug"</span>: <span class="hljs-string">"^2.6.6"</span>,
     <span class="hljs-attr">"memory-fs"</span>: <span class="hljs-string">"^0.4.1"</span>,
     <span class="hljs-attr">"metalsmith-cache"</span>: <span class="hljs-string">"^1.0.1"</span>,
-    <span class="hljs-attr">"vow"</span>: <span class="hljs-string">"^0.4.15"</span>,
-    <span class="hljs-attr">"webpack"</span>: <span class="hljs-string">"^2.5.1"</span>
+    <span class="hljs-attr">"vow"</span>: <span class="hljs-string">"^0.4.15"</span>
   },
   <span class="hljs-attr">"devDependencies"</span>: {
     <span class="hljs-attr">"assert-dir-equal"</span>: <span class="hljs-string">"^1.0.1"</span>,
