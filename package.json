@@ -30,11 +30,12 @@
     "webpack": "^4.0.0"
   },
   "dependencies": {
+    "acorn": "^6.1.0",
+    "ajv": "^6.9.2",
     "debug": "^2.6.6",
     "memory-fs": "^0.4.1",
     "metalsmith-cache": "^1.0.1",
-    "vow": "^0.4.15",
-    "webpack": "^4.29.5"
+    "vow": "^0.4.15"
   },
   "devDependencies": {
     "assert-dir-equal": "^1.0.1",
